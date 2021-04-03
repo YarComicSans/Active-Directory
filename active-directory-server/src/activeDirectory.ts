@@ -8,35 +8,37 @@ export class ActiveDirectory {
     
 
     constructor () {
-        let config = {
-            url: process.env.URL,
-            baseDN: process.env.BASEDN,
-            username: process.env.USERNAME,
-            password: process.env.PASSWORD
-        } 
+        var config = {
+            url: 'ldap://mydomain.ru',
+            baseDN: 'dc=mydomain,dc=ru',
+            username: 'Administrator@mydomain.ru',
+            password: 'PasswordAdmin123',
+        }
         this.activeDirectory = new activedirectory(config)
     }
 
     async GetUsers() : Promise<UserDto[]> {
-        // this.activeDirectory.findUsers('cn=*,', function(err, users) {
-        //     if(err) {
-        //         console.log('ERROR: ' + JSON.stringify(err))
-        //         return null
-        //     }
+        return new Promise((resolve, reject) => {
+			this.activeDirectory.findUsers('cn=*', true, function(err, users){
+    	        if(err) {
+		            console.log('ERROR: ' + JSON.stringify(err))
+		            return []
+		        }
+		        console.log(users);
 
-        //     return users
-        // })
-
-        return new Promise((resolve) => {
-            resolve([{
-                dn:"CN=Guest,CN=Users,DC=mydomain,DC=ru",
-                sAMAccountName:"Guest",
-                whenCreated:"20210207140220.0Z",
-                pwdLastSet:"0",
-                userAccountControl:"66082",
-                cn:"Guest",
-                description:"Built-in account for guest access to the computer/domain"
-            }])
+		        resolve(users);
+            })
         })
+        // return new Promise((resolve) => {
+        //     resolve([{
+        //         dn:"CN=Guest,CN=Users,DC=mydomain,DC=ru",
+        //         sAMAccountName:"Guest",
+        //         whenCreated:"20210207140220.0Z",
+        //         pwdLastSet:"0",
+        //         userAccountControl:"66082",
+        //         cn:"Guest",
+        //         description:"Built-in account for guest access to the computer/domain"
+        //     }])
+        // })
     }
 }
