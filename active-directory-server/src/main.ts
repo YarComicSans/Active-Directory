@@ -4,7 +4,7 @@ import { AppModule } from './module';
 import * as dotenv from 'dotenv';
 
 async function bootstrap() {
-  dotenv.config()
+  dotenv.config({path: './config.env'});
   const app = await NestFactory.create(AppModule, {cors:true})
   
   const config = new DocumentBuilder()

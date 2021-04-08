@@ -9,10 +9,10 @@ export class ActiveDirectory {
 
     constructor () {
         var config = {
-            url: 'ldap://mydomain.ru',
-            baseDN: 'dc=mydomain,dc=ru',
-            username: 'Administrator@mydomain.ru',
-            password: 'PasswordAdmin123',
+            url: process.env.URL,
+            baseDN: process.env.BASEDN,
+            username: process.env.USER,
+            password: process.env.PASSWORD,
         }
         this.activeDirectory = new activedirectory(config)
     }
