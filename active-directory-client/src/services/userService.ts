@@ -11,5 +11,5 @@ export interface UserInfo {
 }
 
 export function CreateUserInfoFromDto (user: UserInfoDto) : UserInfo {
-    return { ...user }
+  return { ...user }
 }

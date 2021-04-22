@@ -1,24 +1,33 @@
-import { AdQuery, UserDto, UsersDto } from "./types";
-import { Injectable, Query } from "@nestjs/common";
+import { ActiveDirectoryConfig, ActiveDirectoryConfigDto, UserDto, UsersDto } from './types'
+import { Injectable, Query } from '@nestjs/common'
 
 @Injectable()
 export class Converter {
-    oDataToAdQuery(odataQuery: typeof Query) { //returns adQuery
-        let result : {[id: string]: any} = {};
-        
-        const skip = odataQuery['$skip']
-        if(skip) result['skip'] = Number(skip)
+    oDataToAdQuery (odataQuery: typeof Query) { // returns adQuery
+        // const result : {[id: string]: any} = {}
 
-        const limit = odataQuery['$top']
-        if(limit) result['limit'] = Number(limit)
+        // const skip = odataQuery.$skip
+        // if (skip) result.skip = Number(skip)
 
-        return result
+        // const limit = odataQuery.$top
+        // if (limit) result.limit = Number(limit)
+
+        // return result
     }
 
-    userInfoToUserDto(users: UserDto[]): UsersDto{
+    userInfoToUserDto (users: UserDto[]): UsersDto {
         return {
             users: users,
             totalCount: users.length
+        }
+    }
+
+    configDtoToActiveDirectoryConfig (configDto: ActiveDirectoryConfigDto) : ActiveDirectoryConfig {
+        return {
+            username: configDto.username,
+            password: configDto.password,
+            url: configDto.ldapUrl,
+            baseDN: configDto.basedn
         }
     }
 }

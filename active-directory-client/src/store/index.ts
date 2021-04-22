@@ -6,7 +6,7 @@ import storeReducer from './reducer'
 import { ApplicationState } from './types'
 
 export const connect = <S, A>(state: (s : ApplicationState) => S, actions? : A) => {
-    return reduxConnect(state, actions)
+  return reduxConnect(state, actions)
 }
 
 export type { ApplicationState } from './types'
@@ -17,10 +17,10 @@ export type TypeOfConnect<T> = T extends InferableComponentEnhancerWithProps<inf
     : never
 
 export default function configureStore () {
-    const loggerMiddleware = logger.createLogger()
-    return createStore(
-        storeReducer,
-        undefined,
-        applyMiddleware(thunkMiddleware, loggerMiddleware)
-    )
+  const loggerMiddleware = logger.createLogger()
+  return createStore(
+    storeReducer,
+    undefined,
+    applyMiddleware(thunkMiddleware, loggerMiddleware)
+  )
 }

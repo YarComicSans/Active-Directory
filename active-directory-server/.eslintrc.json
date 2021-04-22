@@ -7,11 +7,6 @@
         "plugin:react/recommended",
         "standard"
     ],
-    "settings": {
-        "react": {
-          "version": "detect"
-        }
-      },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaFeatures": {
@@ -25,5 +20,6 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "indent": ["error", 4]
     }
 }
