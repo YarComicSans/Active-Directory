@@ -10,6 +10,11 @@ export interface UserInfo {
     description: string,
 }
 
-export function CreateUserInfoFromDto (user: UserInfoDto) : UserInfo {
-  return { ...user }
+export function CreateUserInfoFromDto (users: UserInfoDto[]) : {[id: string]: UserInfo} {
+  const usersInfo: {[id: string]: UserInfo} = {}
+  users.forEach(user => {
+    usersInfo[user.cn] = user
+  })
+
+  return usersInfo
 }
