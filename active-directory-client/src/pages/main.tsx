@@ -2,22 +2,23 @@
 import React from 'react'
 import UserTable from '../view/components/userTable'
 import SignIn from '../view/components/signIn'
-import { ApplicationState, TypeOfConnect, connect } from '../store'
+import { ApplicationState, TypeOfConnect, connect, } from '../store'
 
 const storeEnhancer = connect(
   (state: ApplicationState) => ({
-    isUserAuthenticated: state.isUserAuthenticated
-  }), {}
+    isUserAuthenticated: state.isUserAuthenticated,
+  }),
+  {}
 )
 
-type AppProps = {} & TypeOfConnect<typeof storeEnhancer>
+type AppProps = {} & TypeOfConnect<typeof storeEnhancer>;
 
 function App (props: AppProps) {
   return (
-        <div className='app'>
-            {!props.isUserAuthenticated && <SignIn/>}
-            {props.isUserAuthenticated && <UserTable/>}
-        </div>
+    <div className="app">
+      {!props.isUserAuthenticated && <SignIn />}
+      {props.isUserAuthenticated && <UserTable />}
+    </div>
   )
 }
 

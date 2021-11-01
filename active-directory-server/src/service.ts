@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ActiveDirectory } from './activeDirectory'
 import { Converter } from './converter'
-import { ActiveDirectoryConfigDto, UsersDto, UserSignInParams } from './types'
+import { ActiveDirectoryConfigDto, UsersDto, CredentialsPayload } from './types'
 
 @Injectable()
 export class ActiveDirectoryService {
@@ -18,7 +18,7 @@ export class ActiveDirectoryService {
         return usersInfo
     }
 
-    async AuthenticateUser (signInParams: UserSignInParams): Promise<boolean> {
+    async AuthenticateUser (signInParams: CredentialsPayload): Promise<boolean> {
         try {
             const { username, password } = signInParams
             const response = await this.activeDirectory.AuthenticateUser(username, password)

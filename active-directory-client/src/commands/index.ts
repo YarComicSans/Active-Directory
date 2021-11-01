@@ -1,6 +1,6 @@
 import * as actions from '../store/actions'
 // import api from '../api/'
-import { UserSignInParams } from '../api/activeDirectory'
+import { UserSignInParams, } from '../api/api'
 
 export function signInUser (userSignInParams: UserSignInParams) {
   return async (dispatch: any) => {

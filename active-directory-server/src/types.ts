@@ -13,7 +13,7 @@ export type UsersDto = {
   totalCount: number;
 };
 
-export type UserSignInParams = {
+export type CredentialsPayload = {
   username: string;
   domain: string;
   password: string;

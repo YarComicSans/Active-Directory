@@ -1,19 +1,24 @@
 // eslint-disable-next-line no-use-before-define
 import * as React from 'react'
-import { useState, useEffect } from 'react'
-import { makeStyles, Theme } from '@material-ui/core/styles'
-import TreeItem from '@material-ui/lab/TreeItem'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import TreeView from '@material-ui/lab/TreeView'
+import { useState, useEffect, useContext, } from 'react'
+import { makeStyles, Theme, } from '@material-ui/core/styles'
+import TreeView from './TreeView'
 import SplitterLayout from 'react-splitter-layout'
 import 'react-splitter-layout/lib/index.css'
-import api from '../../api'
-import { UserFetchParams } from '../../api/activeDirectory'
-import { UserInfo, CreateUserInfoFromDto } from '../../services/userService'
-import { TextField, AppBar, Toolbar, Typography, createStyles } from '@material-ui/core'
-import PeopleAltIcon from '@material-ui/icons/PeopleAlt'
-import PersonIcon from '@material-ui/icons/Person'
+import {
+  TextField,
+  AppBar,
+  Toolbar,
+  createStyles,
+  Avatar,
+  Button,
+  Box,
+} from '@material-ui/core'
+import { Stack, } from '@mui/material'
+import UserStore from '../../store/UserStore'
+import { TreeNodes, } from './TreeView/TreeView'
+import { User, } from '../../types/types.users'
+import { observer, } from 'mobx-react-lite'
 
 // const storeEnhancer = connect(
 //     (state: StoreState) => ({users: state.users}),
@@ -24,104 +29,184 @@ import PersonIcon from '@material-ui/icons/Person'
 
 // type Props = {} & TypeOfConnect<typeof storeEnhancer>
 
+// eslint-disable-next-line no-unused-vars
 const useRowStyles = makeStyles((theme: Theme) =>
   createStyles({
     row: {
       '& > *': {
-        borderBottom: 'unset'
-      }
+        borderBottom: 'unset',
+      },
     },
     tree: {
       height: 216,
       flexGrow: 1,
-      maxWidth: 400
+      maxWidth: 400,
     },
     title: {
-      flexGrow: 1
+      flexGrow: 1,
     },
     labelIcon: {
-      marginRight: theme.spacing(1)
+      marginRight: theme.spacing(1),
     },
     labelText: {
       fontWeight: 'inherit',
-      flexGrow: 1
+      flexGrow: 1,
     },
     labelRoot: {
       display: 'flex',
       alignItems: 'center',
-      padding: theme.spacing(0.5, 0)
-    }
-  }))
-
-export default function UserTable () {
-  const classes = useRowStyles()
-  const [fetchParams] = useState<UserFetchParams>({
-    pageNumber: 0,
-    pageSize: 5
+      padding: theme.spacing(0.5, 0),
+    },
   })
-  const [selectedUser, setSelectedUser] = useState<string | null>(null)
+)
 
-  const [users, setUsers] = useState<{[id: string]: UserInfo}>({})
+const UserTable = observer(() => {
+  const { fetchUserData, getUsers, updateUser, isUpdating, deleteUser, } = useContext(UserStore)
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await api.activeDirectory.getUsers(fetchParams)
-        const convertedUserInfos = CreateUserInfoFromDto(response.users)
-        setUsers(convertedUserInfos)
-        setSelectedUser(null)
-      } catch (e) {
-        console.log(e)
-      }
-    })()
-  }, [fetchParams])
+  // const classes = useRowStyles()
+  const [selectedNode, setSelectedNode] = useState<User | null>(null)
+  const [selectedNodeValues, setSelectedNodeValues] = useState<User | null>(null)
 
-  const handleTreeNodeSelect = (event: any, nodeId: string) => {
-    if (Object.keys(users).includes(nodeId)) setSelectedUser(nodeId)
+  const [treeNodes, setTreeNodes] = useState<TreeNodes | null>(null)
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+
+  const setTree = (nodes: TreeNodes) => {
+    setTreeNodes(nodes)
   }
 
-  return (
-   <React.Fragment>
-    <AppBar position='static'>
-      <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            Users
-          </Typography>
-      </Toolbar>
-    </AppBar>
-    <SplitterLayout>
-        <TreeView
-          className={classes.tree}
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          onNodeSelect={handleTreeNodeSelect}
-        >
-          {users &&
-          <TreeItem nodeId='CN=Users' label={
-            <div className={classes.labelRoot}>
-              <PeopleAltIcon className={classes.labelIcon}/>
-              <Typography variant="body2" className={classes.labelText}>Users</Typography>
-            </div>
-          }>
-            {Object.keys(users).map(id => <TreeItem key={users[id].cn} nodeId={users[id].cn} label={
-              <div className={classes.labelRoot}>
-                <PersonIcon className={classes.labelIcon}/>
-                <Typography variant="body2" className={classes.labelText}>{users[id].sAMAccountName}</Typography>
-              </div>
-            }/>)}
-          </TreeItem>
-          }
-        </TreeView>
+  const handleTreeNodeSelect = (event: any, nodeId: string) => {
+    if (nodeId.toUpperCase().indexOf('CN=USERS') !== -1) {
+      setSelectedNode(treeNodes!.users[nodeId])
+    }
+  }
+
+  const setEditing = () => {
+    setIsEditing(true)
+  }
+
+  const onDeletePress = async () => {
+    await deleteUser(selectedNode!)
+  }
+
+  const saveChanges = async () => {
+    await updateUser(selectedNode!)
+    setIsEditing(false)
+  }
+
+  const cancelChanges = () => {
+    setSelectedNode(treeNodes!.users['CN=Guest,CN=Users,DC=mydomain,DC=ru'])
+    setIsEditing(false)
+  }
+
+  const handleSelectedNodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedNode = { ...selectedNode, } as any
+    updatedNode[event.target.name] = event.target.value
+    setSelectedNode(updatedNode)
+  }
+
+  const renderTextField = (key: string, value: string) =>
+    <TextField
+      name={key}
+      value={value}
+      fullWidth
+      key={key}
+      label={key}
+      onChange={handleSelectedNodeChange}
+      disabled={!isEditing}
+  />
+
+  console.log(treeNodes)
+
+  const renderEditScreen = () => {
+    return (
+      selectedNode && (
         <div>
-        {selectedUser &&
-          <div>
-            {
-              Object.keys(users[selectedUser]).map((key, index) =>
-                <TextField value={Object.values(users[selectedUser])[index]} fullWidth key={key} label={key} disabled></TextField>)}
-          </div>
-        }
+          <Box
+            style={{
+              flexDirection: 'row',
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Button disabled={!isEditing}>
+            <Avatar style={{ height: 60, width: 60, }}>User</Avatar>
+            </Button>
+            <Stack spacing={2} direction="row" style={{}}>
+              <Button onClick={setEditing}>Edit</Button>
+              <Button onClick={onDeletePress}>Delete</Button>
+            </Stack>
+          </Box>
+          {Object.keys(selectedNode!).map((key, index) =>
+            renderTextField(key, (selectedNode as any)[key]))}
+          {isEditing && (
+            <Stack spacing={2} direction="row" style={{ flexGrow: 1, }}>
+              <Button onClick={saveChanges}>Save</Button>
+              <Button onClick={cancelChanges}>Cancel</Button>
+            </Stack>
+          )}
         </div>
+      )
+    )
+  }
+
+  const fetchTreeData = async () => {
+    try {
+      await fetchUserData()
+      setTree({ users: getUsers(), })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  useEffect(() => {
+    fetchTreeData()
+    setSelectedNode(null)
+  }, [])
+
+  useEffect(() => {
+    if (treeNodes && !isUpdating) {
+      !!treeNodes!.users && setSelectedNode({ ...treeNodes!.users['CN=Guest,CN=Users,DC=mydomain,DC=ru']!, })
+    }
+  }, [isUpdating])
+
+  return (
+    <React.Fragment>
+      <AppBar position="static">
+        <Toolbar>
+          <Stack spacing={2} direction="row" style={{ flexGrow: 1, }}>
+            <Button
+              variant="outlined"
+              style={{ color: 'white', borderColor: 'white', }}
+            >
+              File
+            </Button>
+            <Button
+              variant="outlined"
+              style={{ color: 'white', borderColor: 'white', }}
+            >
+              Action
+            </Button>
+            <Button
+              variant="outlined"
+              style={{ color: 'white', borderColor: 'white', }}
+            >
+              View
+            </Button>
+          </Stack>
+          <Button
+            variant="outlined"
+            style={{ color: 'white', borderColor: 'white', }}
+          >
+            Login
+          </Button>
+        </Toolbar>
+      </AppBar>
+      <SplitterLayout>
+        <TreeView nodes={treeNodes ?? null} onNodeSelected={handleTreeNodeSelect} />
+        <div>{renderEditScreen()}</div>
       </SplitterLayout>
-   </React.Fragment>
+    </React.Fragment>
   )
-}
+})
+
+export default UserTable

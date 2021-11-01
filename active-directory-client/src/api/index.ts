@@ -1,8 +1,14 @@
-import * as activeDirectory from './activeDirectory'
+import api from './api'
 
 export default {
   activeDirectory: {
-    getUsers: activeDirectory.getUsers,
-    signInUser: activeDirectory.signInUser
-  }
+    users: {
+      getUsers: api.getUsers,
+      updateUsers: api.updateUsers,
+      deleteUser: api.deleteUser,
+    },
+    auth: {
+      loginUser: api.loginUser,
+    },
+  },
 }
