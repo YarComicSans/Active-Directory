@@ -11,3 +11,11 @@ export type UpdateUsersPayload = {
 export type DeleteUserPayload = {
     user: User,
 }
+
+export type AddUserPayload = {
+    user: User,
+}
+
+export type AddUserResponse = {
+    user: User,
+}

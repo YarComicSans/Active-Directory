@@ -9,10 +9,7 @@ import PersonIcon from '@material-ui/icons/Person'
 
 import { getStyleClasses, } from './TreeView.styles'
 import { Users, } from '../../../types/types.users'
-
-export type TreeNodes = {
-  users: Users;
-};
+import { TreeNodes, } from './TreeView.types'
 
 type TreeViewProps = {
   nodes: TreeNodes | null;
@@ -37,6 +34,7 @@ function TreeViewComponent ({ nodes, onNodeSelected, }: TreeViewProps) {
 
   return (
     <TreeView
+      className={classes.tree}
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
       expanded={expanded}

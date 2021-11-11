@@ -1,25 +1,20 @@
 // eslint-disable-next-line no-use-before-define
-import React from 'react'
-import UserTable from '../view/components/userTable'
-import SignIn from '../view/components/signIn'
-import { ApplicationState, TypeOfConnect, connect, } from '../store'
+import React, { useContext, } from 'react'
+import { observer, } from 'mobx-react-lite'
+import AuthStore from '../store/AuthStore'
+import SignIn from '../view/components/SignIn'
+import Home from './Home'
 
-const storeEnhancer = connect(
-  (state: ApplicationState) => ({
-    isUserAuthenticated: state.isUserAuthenticated,
-  }),
-  {}
-)
+const App = observer(() => {
+  const { isAuthenticated, } = useContext(AuthStore)
 
-type AppProps = {} & TypeOfConnect<typeof storeEnhancer>;
-
-function App (props: AppProps) {
+  console.log(isAuthenticated)
   return (
     <div className="app">
-      {!props.isUserAuthenticated && <SignIn />}
-      {props.isUserAuthenticated && <UserTable />}
+      {!isAuthenticated && <SignIn/>}
+      {isAuthenticated && <Home/>}
     </div>
   )
-}
+})
 
-export default storeEnhancer(App)
+export default App

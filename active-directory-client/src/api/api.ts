@@ -2,7 +2,7 @@ import axios from 'axios'
 import { API_REQUEST_TIMEOUT, API_SERVER, } from './api.constants'
 import { CredentialsPayload, LoginResponse, } from './api.login.types'
 import { AgentInstance, } from './api.types'
-import { DeleteUserPayload, GetUserResponse, UpdateUsersPayload, } from './api.user.types'
+import { AddUserPayload, AddUserResponse, DeleteUserPayload, GetUserResponse, UpdateUsersPayload, } from './api.user.types'
 
 export type RequestStatus = 'success' | 'failed' | 'running';
 
@@ -10,12 +10,11 @@ export type RequestInfoDto = {
   status: RequestStatus;
 };
 
-export type UserSignInParams = {
-  username: string;
-  domain: string;
-  password: string;
-  ldapUrl: string;
-};
+export type LoginPayload = {
+  username: string,
+  password: string,
+  ldapUrl: string,
+}
 
 class Api {
   private readonly axios: AgentInstance
@@ -25,16 +24,25 @@ class Api {
       baseURL: API_SERVER,
       timeout: API_REQUEST_TIMEOUT,
       headers: {
+        'Content-Type': 'application/json',
         Accept: 'application/json',
       },
     })
   }
 
-  public loginUser = (payload: CredentialsPayload) =>
-    this.axios.post<LoginResponse>('active-directory/auth', payload)
+  public login = (payload: LoginPayload) =>
+    this.axios.post(`${API_SERVER}active-directory/auth`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
 
   public getUsers = () =>
-    this.axios.get<GetUserResponse>('active-directory/users')
+    this.axios.get<GetUserResponse>('active-directory/users?dn=Users')
+
+  public addUser = (payload: AddUserPayload) => this.axios.post<AddUserResponse>('active-directory/user', payload)
 
   public updateUsers = (payload: UpdateUsersPayload) =>
     this.axios.put('active-directory/users', payload)

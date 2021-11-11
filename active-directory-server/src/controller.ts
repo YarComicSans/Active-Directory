@@ -1,35 +1,53 @@
 import { Body, Controller, Get, Delete, HttpCode, HttpException, HttpStatus, Post, Put, Query } from '@nestjs/common'
-import { ActiveDirectoryService } from './service'
-import { ActiveDirectoryConfigDto, UsersDto, CredentialsPayload } from './types'
-import { Converter } from './converter'
+import { AddPayload, SearchPayload } from './activeDirectory'
+import { ActiveDirectoryService, ConnectParams, Credentials } from './service'
+import { CredentialsPayload } from './types'
 
 @Controller('active-directory')
 export class AppController {
     // eslint-disable-next-line no-useless-constructor
     constructor (
-    private readonly adService: ActiveDirectoryService,
-    private readonly converter: Converter
+    private readonly adService: ActiveDirectoryService
     ) {}
 
   @Get('users')
-    async getUsers (): Promise<UsersDto> {
-        const result = await this.adService.GetUsers()
+    async getUsers (@Query() query?: SearchPayload): Promise<any> {
+        console.log(query)
+
+        const payload = {
+            dn: query?.dn ?? 'CN=Users'
+        }
+        console.log(1)
+        const result = await this.adService.Search(payload)
+        console.log(2)
         return result
     }
 
-  @Put('users')
-  async updateUsers () {
+@Post('users')
+  async addUser (@Body() query: AddPayload): Promise<any> {
       try {
-          await this.adService.updateUsers()
+          console.log(query)
+
+          const result = await this.adService.AddEntry(query)
+          return result
       } catch (e) {
-          throw new HttpException(e, HttpStatus.NOT_MODIFIED)
+          return e
       }
   }
 
+  @Put('users')
+async modifyUser (query: any) {
+    try {
+        await this.adService.ModifyEntry(null)
+    } catch (e) {
+        throw new HttpException(e, HttpStatus.NOT_MODIFIED)
+    }
+}
+
   @Delete('users')
-  async deleteUser () {
+  async deleteUser (query) {
       try {
-          await this.adService.deleteUser()
+          await this.adService.DeleteEntry(null)
       } catch (e) {
           throw new HttpException(e, HttpStatus.NOT_MODIFIED)
       }
@@ -39,8 +57,8 @@ export class AppController {
   @HttpCode(202)
   async authenticateUser (@Body() payload: CredentialsPayload) {
       try {
-          await this.adService.AuthenticateUser(payload)
-
+          //   await this.adService.Connect({ url: payload.ldapUrl })
+          //   await this.adService.Auth(payload as Credentials)
           return 'Authenticated'
       } catch (e) {
           throw new HttpException(e, HttpStatus.UNAUTHORIZED)

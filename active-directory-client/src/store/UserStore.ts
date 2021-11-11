@@ -17,6 +17,20 @@ class UserStore {
 
   getUpdateStatus = () => this.isUpdating
 
+  addUser = async (user: User) => {
+    try {
+      await api.activeDirectory.users.addUser({ user, })
+      await api.activeDirectory.users.getUsers()
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  generateUser = (values: {[key: string]: string}): User => {
+    const user = values as User
+    return user
+  }
+
   updateUser = async (user: User) => {
     this.users[user.dn] = user
     await api.activeDirectory.users.updateUsers({ users: this.users, })

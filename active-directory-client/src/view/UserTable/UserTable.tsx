@@ -2,13 +2,10 @@
 import * as React from 'react'
 import { useState, useEffect, useContext, } from 'react'
 import { makeStyles, Theme, } from '@material-ui/core/styles'
-import TreeView from './TreeView'
 import SplitterLayout from 'react-splitter-layout'
 import 'react-splitter-layout/lib/index.css'
 import {
   TextField,
-  AppBar,
-  Toolbar,
   createStyles,
   Avatar,
   Button,
@@ -16,53 +13,15 @@ import {
 } from '@material-ui/core'
 import { Stack, } from '@mui/material'
 import UserStore from '../../store/UserStore'
-import { TreeNodes, } from './TreeView/TreeView.types'
 import { User, } from '../../types/types.users'
 import { observer, } from 'mobx-react-lite'
-
-// const storeEnhancer = connect(
-//     (state: StoreState) => ({users: state.users}),
-//     {
-
-//     }
-// )
-
-// type Props = {} & TypeOfConnect<typeof storeEnhancer>
-
-// eslint-disable-next-line no-unused-vars
-const useRowStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    row: {
-      '& > *': {
-        borderBottom: 'unset',
-      },
-    },
-    tree: {
-      height: 216,
-      flexGrow: 1,
-      maxWidth: 400,
-    },
-    title: {
-      flexGrow: 1,
-    },
-    labelIcon: {
-      marginRight: theme.spacing(1),
-    },
-    labelText: {
-      fontWeight: 'inherit',
-      flexGrow: 1,
-    },
-    labelRoot: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: theme.spacing(0.5, 0),
-    },
-  })
-)
+import TreeView from '../components/TreeView'
+import { TreeNodes, } from '../components/TreeView/TreeView.types'
+import { useStyles, } from './UserTable.styles'
 
 const UserTable = observer(() => {
   const { fetchUserData, getUsers, updateUser, isUpdating, deleteUser, } = useContext(UserStore)
-
+  const classes = useStyles()
   // const classes = useRowStyles()
   const [selectedNode, setSelectedNode] = useState<User | null>(null)
   const [selectedNodeValues, setSelectedNodeValues] = useState<User | null>(null)
@@ -170,7 +129,7 @@ const UserTable = observer(() => {
   }, [isUpdating])
 
   return (
-      <SplitterLayout>
+      <SplitterLayout customClassName={classes.view}>
         <TreeView nodes={treeNodes ?? null} onNodeSelected={handleTreeNodeSelect} />
         <div>{renderEditScreen()}</div>
       </SplitterLayout>

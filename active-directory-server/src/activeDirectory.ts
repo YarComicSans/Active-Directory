@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import ldap, { Client, Change } from 'ldapjs'
+import * as ldap from 'ldapjs'
+import { Client, Change } from 'ldapjs'
 import { Config } from './config'
 
-type AuthPayload = {
+export type AuthPayload = {
     dn: string;
     password: string;
 }
@@ -13,12 +14,12 @@ type User = {
 type Group = {
 }
 
-type AddPayload = {
+export type AddPayload = {
     dn: string;
     entry: User | Group;
 }
 
-type DeletePayload = {
+export type DeletePayload = {
     dn: string;
 }
 
@@ -28,19 +29,23 @@ enum ModifyOperations {
     Delete = 'delete'
 }
 
-type ModifyPayload = {
+export type ModifyPayload = {
     dn: string;
     operation: ModifyOperations;
     modification: any;
 }
 
-type SearchPayload = {
-    dn: string;
-    options: {
+export type SearchPayload = {
+    dn?: string;
+    options?: {
         filter?: string;
         scope?: 'base' | 'one' | 'sub';
         attributes?: string;
     }
+}
+
+export type ConnectPayload = {
+    url: string;
 }
 
 @Injectable()
@@ -48,12 +53,19 @@ export class ActiveDirectory {
     private client: Client
 
     constructor (private readonly config: Config) {
-        this.client = ldap.createClient({
-            url: config.url
-        })
+    }
 
-        this.client.on('connect', () =>
-            console.log(`Connected to ${config.url} ldap!`))
+    connect (payload: ConnectPayload): Promise<any> {
+        return new Promise((resolve) => {
+            this.client = ldap.createClient({
+                url: payload.url
+            })
+
+            this.client.on('connect', () => {
+                console.log(`Connected to ${payload.url} ldap!`)
+                resolve(`Connected to ${payload.url} ldap!`)
+            })
+        })
     }
 
     authenticate (payload: AuthPayload): Promise<string> {
@@ -106,11 +118,14 @@ export class ActiveDirectory {
 
     search (payload: SearchPayload): Promise<any> {
         const { dn, options } = payload
-        const opts = {
-            filter: options.filter ? options.filter : '',
-            scope: options.scope ? options.scope : undefined,
-            attributes: options.attributes ? options.attributes : ''
-        }
+        const opts = options
+            ? {
+                filter: options.filter ? options.filter : '',
+                scope: options.scope ? options.scope : undefined,
+                attributes: options.attributes ? options.attributes : ''
+            }
+            : {
+            }
 
         return new Promise<any>((resolve, reject) =>
             this.client.search(dn, opts, (err, res) => {
@@ -130,7 +145,7 @@ export class ActiveDirectory {
         )
     }
 
-    logout (payload: ModifyPayload): Promise<string> {
+    logout (): Promise<string> {
         return new Promise<string>((resolve, reject) =>
             this.client.unbind(
                 (err) => {

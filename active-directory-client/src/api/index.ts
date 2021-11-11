@@ -4,11 +4,12 @@ export default {
   activeDirectory: {
     users: {
       getUsers: api.getUsers,
+      addUser: api.addUser,
       updateUsers: api.updateUsers,
       deleteUser: api.deleteUser,
     },
     auth: {
-      loginUser: api.loginUser,
+      login: api.login,
     },
   },
 }
